@@ -242,7 +242,6 @@ NSString *ORDER_CHACHE_NAME = @"order.plist";
 	isChildrenLoaded = YES;
 	if (order == nil) [self saveOrder];
 	return;
-bail:
 	isChildrenLoaded = YES;
 }
 
