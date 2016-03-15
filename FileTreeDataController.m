@@ -900,27 +900,9 @@ skip:
 
 - (void)insertCopyingPath:(NSString *)sourcePath withName:(NSString *)newname
 {
-	NSIndexPath *index_path = [treeController selectionIndexPath];
-	NSString *destination_path = nil;
-	FileDatum *destination_fd = nil;
-	if (index_path) {
-		if ([index_path length]) {
-			NSTreeNode *a_node = [_rootNode descendantNodeAtIndexPath:index_path];
-			destination_fd = [[a_node parentNode] representedObject];
-			destination_path = [destination_fd path];
-			index_path = [index_path indexPathByIncrementLastIndex:1];
-		} else {
-			destination_fd = _rootDirectory;
-			destination_path = [_rootDirectory path];
-			index_path = [NSIndexPath indexPathWithIndex:[[_rootNode childNodes] count]];
-		}
-	} else {
-		destination_fd = _rootDirectory;
-		destination_path = [_rootDirectory path];
-		index_path = [NSIndexPath indexPathWithIndex:[[_rootNode childNodes] count]];
-	}
-	
-	NSString *target_path = [destination_path stringByAppendingPathComponent:newname];
+	[self updateDestinationNode];
+    FileDatum *dest_fd = [_destinationNode representedObject];
+	NSString *target_path = [[dest_fd path] stringByAppendingPathComponent:newname];
 	target_path = [target_path uniqueName];
     NSFileManager *fm = [NSFileManager defaultManager];
     NSError *err = nil;
@@ -929,10 +911,12 @@ skip:
         [NSApp presentError:err];
         return;
     }
-	FileTreeNode *newnode = [[FileDatum fileDatumWithPath:target_path] treeNode];
-	[[[destination_fd treeNode] mutableChildNodes]
-     insertObject:newnode atIndex:[index_path lastIndex]];
-	[destination_fd saveOrder];
+    FileDatum *file_dataum = [FileDatum fileDatumWithPath:target_path];
+	[[_destinationNode mutableChildNodes]
+                insertObject:[file_dataum treeNode]
+                atIndex:[_destinationIndexPath lastIndex]];
+    [treeController setSelectionIndexPath:_destinationIndexPath];
+	[dest_fd saveOrder];
 }
 
 - (void)insertCopyingPathes:(NSArray *)sourcePaths
